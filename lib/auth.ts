@@ -1,5 +1,5 @@
 import GoogleProvider from "next-auth/providers/google";
-import prisma from "@/utils/db";
+import prisma from "@/lib/db";
 import { NextAuthOptions } from "next-auth";
 
 export const authOptions: NextAuthOptions = {
@@ -13,14 +13,14 @@ export const authOptions: NextAuthOptions = {
     strategy: "jwt",
   },
   callbacks: {
-    async signIn({ user, account, profile }) {      
+    async signIn({ user }) {      
       if (user.email) {
         const existingUser = await prisma.user.findUnique({
           where: { email: user.email },
         });
 
         if (!existingUser) {
-          const newUser = await prisma.user.create({
+          await prisma.user.create({
             data: {
               email: user.email,
               name: user.name,
@@ -32,10 +32,10 @@ export const authOptions: NextAuthOptions = {
       }
       return true;
     },
-    async jwt({ token, user, account }) {
-      if (user) {
+    async jwt({ token, user }) {
+      if (user && user.email) {
         const dbUser = await prisma.user.findUnique({
-          where: { email: user.email! },
+          where: { email: user.email },
         });
         if (dbUser) {
           token.sub = dbUser.id;
