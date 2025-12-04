@@ -13,13 +13,7 @@ export default function SignInPage() {
     >
       <button
         onClick={handleGoogle}
-        style={{
-          padding: "10px 20px",
-          borderRadius: "8px",
-          border: "1px solid gray",
-          cursor: "pointer",
-          fontSize: "16px",
-        }}
+        className="mx-2 px-2 rounded"
       >
         Sign in with Google
       </button>
