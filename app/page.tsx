@@ -1,6 +1,6 @@
-import Image from "next/image";
+import prisma from "@/utils/db";
 
-export default function Home() {
+export default async function Home() {
   return (
     <div>
       <h1>cetificate manager</h1>

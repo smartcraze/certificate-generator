@@ -1,6 +1,6 @@
 generator client {
   provider = "prisma-client"
-  output   = "../app/generated/prisma"
+  output   = "../generated/prisma"
 }
 
 datasource db {
@@ -10,7 +10,7 @@ datasource db {
 
 
 model Account {
-  id                String  @id @default(uuid())
+  id                String  @id @default(cuid())
   userId            String
   type              String
   provider          String
@@ -23,38 +23,38 @@ model Account {
   id_token          String?
   session_state     String?
 
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id])
 
   @@unique([provider, providerAccountId])
 }
 
-model Session {
-  id           String   @id @default(uuid())
-  sessionToken String   @unique
-  userId       String
-  expires      DateTime
-  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-}
 
-model VerificationToken {
+
+
+model VerificationRequest {
+  id         String   @id @default(cuid())
   identifier String
   token      String   @unique
   expires    DateTime
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
 
   @@unique([identifier, token])
 }
 
+
+
 model User {
-  id            String    @id @default(uuid())
+  id            String    @id @default(cuid())
   name          String?
-  email         String    @unique
+  email         String?   @unique
   emailVerified DateTime?
   image         String?
-  password      String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  accounts      Account[]
+  projects Project[]
 
-  accounts Account[]
-  sessions Session[]
-  Projects Project[]
 }
 
 model Project {
@@ -74,17 +74,17 @@ model Template {
   id         String @id @default(uuid())
   projectId  String
   name       String
-  fileUrl    String // the uploaded template image OR PDF
-  configJSON String // stores positioning of fields, font size etc
+  fileUrl    String // the uploaded template url
+  configJSON String // positioning of fields
 
-  project               Project                @relation(fields: [projectId], references: [id])
+  project    Project  @relation(fields: [projectId], references: [id])
   generatedCertificates GeneratedCertificate[]
 }
 
 model Dataset {
   id         String       @id @default(uuid())
   projectId  String
-  name       String // e.g "Hackathon Participants"
+  name       String     // e.g., "Event Attendees"
   uploadedAt DateTime     @default(now())
   rows       DatasetRow[]
 
@@ -94,7 +94,7 @@ model Dataset {
 model DatasetRow {
   id                    String                 @id @default(uuid())
   datasetId             String
-  dataJSON              Json // { "name": "John", "score": "92", "rank": "1" }
+  dataJSON              Json                 // e.g., { "name": "John Doe", "email": "
   dataset               Dataset                @relation(fields: [datasetId], references: [id])
   generatedCertificates GeneratedCertificate[]
 }
