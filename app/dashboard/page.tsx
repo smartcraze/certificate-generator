@@ -1,31 +1,58 @@
 'use client';
-import React, { useEffect } from 'react';
-import { useSession } from 'next-auth/react';
+
+import { useSession } from "next-auth/react";
 import { useRouter } from 'next/navigation';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { useEffect, useState } from 'react';
+import Link from 'next/link';
 import { Button } from '@/components/ui/button';
-import { Plus, FileText, Database, Award } from 'lucide-react';
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { Plus, FileText, Calendar, Settings } from 'lucide-react';
 import Navbar from '@/components/Navbar';
 
-function Dashboard() {
+interface Project {
+  id: string;
+  ProjectName: string;
+  description: string | null;
+  createdAt: string;
+  _count?: {
+    templates: number;
+    generatedCertificates: number;
+  };
+}
+
+export default function Dashboard() {
   const { data: session, status } = useSession();
   const router = useRouter();
+  const [projects, setProjects] = useState<Project[]>([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (status === 'unauthenticated') {
-      router.push('/auth/signin');
+    if (status === "unauthenticated") {
+      router.push('/');
     }
   }, [status, router]);
 
-  if (status === 'loading') {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
-      </div>
-    );
-  }
+  useEffect(() => {
+    if (status === "authenticated") {
+      fetchProjects();
+    }
+  }, [status]);
 
-  if (status === 'unauthenticated') {
+  const fetchProjects = async () => {
+    try {
+      const response = await fetch('/api/project');
+      if (response.ok) {
+        const data = await response.json();
+        setProjects(data.projects || []);
+      }
+    } catch (error) {
+      console.error('Error fetching projects:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (status === "loading" || loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
@@ -37,90 +64,79 @@ function Dashboard() {
     <div className="min-h-screen bg-background">
       <Navbar />
       <main className="container mx-auto px-4 py-8">
-        <div className="space-y-8">
-          {/* Header */}
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-3xl font-bold tracking-tight">
-                Welcome back, {session?.user?.name?.split(' ')[0]}!
-              </h1>
-              <p className="text-muted-foreground mt-1">
-                Manage your certificate generation projects
-              </p>
-            </div>
-            <Button size="lg" className="gap-2">
-              <Plus className="h-5 w-5" />
+        <div className="flex justify-between items-center mb-8">
+          <div>
+            <h1 className="text-3xl font-bold tracking-tight">My Projects</h1>
+            <p className="text-muted-foreground mt-1">
+              Manage your certificate templates and projects
+            </p>
+          </div>
+          <Link href="/dashboard/project/new">
+            <Button size="lg">
+              <Plus className="mr-2 h-4 w-4" />
               New Project
             </Button>
-          </div>
+          </Link>
+        </div>
 
-          {/* Stats Cards */}
-          <div className="grid gap-4 md:grid-cols-3">
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">
-                  Total Projects
-                </CardTitle>
-                <FileText className="h-4 w-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">0</div>
-                <p className="text-xs text-muted-foreground">
-                  No projects yet
-                </p>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">
-                  Templates
-                </CardTitle>
-                <Database className="h-4 w-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">0</div>
-                <p className="text-xs text-muted-foreground">
-                  Create your first template
-                </p>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">
-                  Certificates Generated
-                </CardTitle>
-                <Award className="h-4 w-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">0</div>
-                <p className="text-xs text-muted-foreground">
-                  Ready to generate
-                </p>
-              </CardContent>
-            </Card>
-          </div>
-
-          {/* Empty State */}
-          <Card className="mt-8">
-            <CardHeader className="text-center">
-              <CardTitle>No projects yet</CardTitle>
-              <CardDescription>
-                Get started by creating your first certificate generation project
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="flex justify-center pb-8">
-              <Button size="lg" className="gap-2">
-                <Plus className="h-5 w-5" />
-                Create Your First Project
-              </Button>
+        {projects.length === 0 ? (
+          <Card className="border-dashed">
+            <CardContent className="flex flex-col items-center justify-center py-16">
+              <FileText className="h-16 w-16 text-muted-foreground mb-4" />
+              <h3 className="text-xl font-semibold mb-2">No projects yet</h3>
+              <p className="text-muted-foreground text-center mb-6 max-w-md">
+                Get started by creating your first project. You'll be able to upload templates
+                and generate certificates.
+              </p>
+              <Link href="/dashboard/project/new">
+                <Button>
+                  <Plus className="mr-2 h-4 w-4" />
+                  Create Your First Project
+                </Button>
+              </Link>
             </CardContent>
           </Card>
-        </div>
+        ) : (
+          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+            {projects.map((project) => (
+              <Card key={project.id} className="hover:shadow-lg transition-shadow">
+                <CardHeader>
+                  <CardTitle className="flex items-center justify-between">
+                    <span className="truncate">{project.ProjectName}</span>
+                  </CardTitle>
+                  <CardDescription className="line-clamp-2">
+                    {project.description || 'No description'}
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-2 text-sm text-muted-foreground">
+                    <div className="flex items-center">
+                      <FileText className="mr-2 h-4 w-4" />
+                      <span>{project._count?.templates || 0} Templates</span>
+                    </div>
+                    <div className="flex items-center">
+                      <Calendar className="mr-2 h-4 w-4" />
+                      <span>Created {new Date(project.createdAt).toLocaleDateString()}</span>
+                    </div>
+                  </div>
+                </CardContent>
+                <CardFooter className="flex gap-2">
+                  <Link href={`/dashboard/project/${project.id}`} className="flex-1">
+                    <Button variant="default" className="w-full">
+                      Open Project
+                    </Button>
+                  </Link>
+                  <Link href={`/dashboard/project/${project.id}/settings`}>
+                    <Button variant="outline" size="icon">
+                      <Settings className="h-4 w-4" />
+                    </Button>
+                  </Link>
+                </CardFooter>
+              </Card>
+            ))}
+          </div>
+        )}
       </main>
     </div>
   );
 }
-
-export default Dashboard;
-
-

@@ -19,7 +19,20 @@ export async function POST(request: NextRequest) {
         });
     }
 
-    await prisma.project.create({
+    // Verify user exists in database
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+    });
+
+    if (!user) {
+      return sendError({
+        message: "User not found in database",
+        status: 404,
+        error: "Please sign out and sign in again",
+      });
+    }
+
+    const project = await prisma.project.create({
       data: {
         ProjectName: projectName,
         userId: userId,
@@ -30,7 +43,7 @@ export async function POST(request: NextRequest) {
     return sendSuccess({
       message: "Project created successfully",
       status: 201,
-      data: null,
+      data: { project },
     });
   } catch (error) {
     return sendError({

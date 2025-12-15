@@ -29,7 +29,7 @@ model Project {
   datasets              Dataset[]
   generatedCertificates GeneratedCertificate[]
 
-  user User @relation(fields: [userId], references: [id])
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model Template {
@@ -39,7 +39,7 @@ model Template {
   fileUrl    String // the uploaded template url
   configJSON String // positioning of fields
 
-  project    Project  @relation(fields: [projectId], references: [id])
+  project    Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
   generatedCertificates GeneratedCertificate[]
 }
 
@@ -50,14 +50,14 @@ model Dataset {
   uploadedAt DateTime     @default(now())
   rows       DatasetRow[]
 
-  project Project @relation(fields: [projectId], references: [id])
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
 }
 
 model DatasetRow {
   id                    String                 @id @default(uuid())
   datasetId             String
   dataJSON              Json                 // e.g., { "name": "John Doe", "email": "
-  dataset               Dataset                @relation(fields: [datasetId], references: [id])
+  dataset               Dataset                @relation(fields: [datasetId], references: [id], onDelete: Cascade)
   generatedCertificates GeneratedCertificate[]
 }
 
@@ -74,7 +74,7 @@ model GeneratedCertificate {
   verified      Boolean      @default(false)
   generatedAt   DateTime     @default(now())
 
-  project       Project @relation(fields: [projectId], references: [id])
-  template      Template @relation(fields: [templateId], references: [id])
-  datasetRow    DatasetRow? @relation(fields: [datasetRowId], references: [id])
+  project       Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  template      Template @relation(fields: [templateId], references: [id], onDelete: Cascade)
+  datasetRow    DatasetRow? @relation(fields: [datasetRowId], references: [id], onDelete: SetNull)
 }

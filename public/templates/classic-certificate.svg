@@ -1,0 +1,71 @@
+<svg width="1200" height="849" viewBox="0 0 1200 849" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background -->
+  <rect width="1200" height="849" fill="#FEFEFE"/>
+  
+  <!-- Border -->
+  <rect x="40" y="40" width="1120" height="769" fill="none" stroke="#4F46E5" stroke-width="8"/>
+  <rect x="60" y="60" width="1080" height="729" fill="none" stroke="#4F46E5" stroke-width="2"/>
+  
+  <!-- Decorative corners -->
+  <circle cx="100" cy="100" r="15" fill="#4F46E5" opacity="0.3"/>
+  <circle cx="1100" cy="100" r="15" fill="#4F46E5" opacity="0.3"/>
+  <circle cx="100" cy="749" r="15" fill="#4F46E5" opacity="0.3"/>
+  <circle cx="1100" cy="749" r="15" fill="#4F46E5" opacity="0.3"/>
+  
+  <!-- Top decorative line -->
+  <line x1="200" y1="150" x2="1000" y2="150" stroke="#4F46E5" stroke-width="1" opacity="0.5"/>
+  
+  <!-- Header -->
+  <text x="600" y="200" font-family="Georgia, serif" font-size="48" font-weight="bold" fill="#4F46E5" text-anchor="middle">
+    CERTIFICATE
+  </text>
+  <text x="600" y="240" font-family="Georgia, serif" font-size="24" fill="#6B7280" text-anchor="middle">
+    OF ACHIEVEMENT
+  </text>
+  
+  <!-- Decorative line under header -->
+  <line x1="400" y1="270" x2="800" y2="270" stroke="#4F46E5" stroke-width="2"/>
+  
+  <!-- This certifies that text -->
+  <text x="600" y="340" font-family="Arial, sans-serif" font-size="20" fill="#374151" text-anchor="middle">
+    This certificate is proudly presented to
+  </text>
+  
+  <!-- Recipient name placeholder -->
+  <text x="600" y="420" font-family="Georgia, serif" font-size="56" font-weight="bold" fill="#1F2937" text-anchor="middle">
+    [Recipient Name]
+  </text>
+  
+  <!-- Underline for name -->
+  <line x1="300" y1="440" x2="900" y2="440" stroke="#9CA3AF" stroke-width="1"/>
+  
+  <!-- Achievement text -->
+  <text x="600" y="510" font-family="Arial, sans-serif" font-size="18" fill="#4B5563" text-anchor="middle">
+    For outstanding achievement and dedication in
+  </text>
+  <text x="600" y="540" font-family="Arial, sans-serif" font-size="18" fill="#4B5563" text-anchor="middle">
+    [Course/Event Name]
+  </text>
+  
+  <!-- Date section -->
+  <text x="300" y="650" font-family="Arial, sans-serif" font-size="16" fill="#6B7280" text-anchor="middle">
+    Date
+  </text>
+  <line x1="200" y1="665" x2="400" y2="665" stroke="#9CA3AF" stroke-width="1"/>
+  <text x="300" y="690" font-family="Arial, sans-serif" font-size="18" fill="#374151" text-anchor="middle">
+    [Date]
+  </text>
+  
+  <!-- Signature section -->
+  <text x="900" y="650" font-family="Arial, sans-serif" font-size="16" fill="#6B7280" text-anchor="middle">
+    Signature
+  </text>
+  <line x1="800" y1="665" x2="1000" y2="665" stroke="#9CA3AF" stroke-width="1"/>
+  <text x="900" y="690" font-family="Arial, sans-serif" font-size="18" fill="#374151" text-anchor="middle">
+    [Authorized Signature]
+  </text>
+  
+  <!-- Bottom decorative elements -->
+  <circle cx="150" cy="424" r="40" fill="none" stroke="#4F46E5" stroke-width="2" opacity="0.2"/>
+  <circle cx="1050" cy="424" r="40" fill="none" stroke="#4F46E5" stroke-width="2" opacity="0.2"/>
+</svg>

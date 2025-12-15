@@ -39,12 +39,21 @@ export const authOptions: NextAuthOptions = {
         });
         if (dbUser) {
           token.sub = dbUser.id;
+          token.email = dbUser.email;
+        }
+      } else if (token.email) {
+        // For existing sessions, ensure we have the user ID
+        const dbUser = await prisma.user.findUnique({
+          where: { email: token.email as string },
+        });
+        if (dbUser) {
+          token.sub = dbUser.id;
         }
       }
       return token;
     },
     async session({ session, token }) {
-      if (session.user) {
+      if (session.user && token.sub) {
         session.user.id = token.sub as string;
       }
       return session;
