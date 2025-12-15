@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import prisma from "@/lib/db";
+import { sendError, sendSuccess } from "@/lib/apiResponse";
 
 export async function GET(
   request: Request,
@@ -12,7 +13,11 @@ export async function GET(
     const { id, templateId } = await params;
 
     if (!session?.user?.id) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      return sendError({
+        message: "Unauthorized",
+        status: 401,
+        error: "You must be logged in to view templates",
+      });
     }
 
     const template = await prisma.template.findFirst({
@@ -26,13 +31,25 @@ export async function GET(
     });
 
     if (!template) {
-      return NextResponse.json({ error: "Template not found" }, { status: 404 });
+      return sendError({
+        message: "Template not found",
+        status: 404,
+        error: "Template does not exist or you don't have permission to view it",
+      });
     }
 
-    return NextResponse.json({ template });
+    return sendSuccess({
+      message: "Template fetched successfully",
+      status: 200,
+      data: { template },
+    });
   } catch (error) {
     console.error("Error fetching template:", error);
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+    return sendError({
+      message: "Failed to fetch template",
+      status: 500,
+      error: error instanceof Error ? error.message : "Unknown error",
+    });
   }
 }
 
@@ -45,7 +62,11 @@ export async function PATCH(
     const { id, templateId } = await params;
 
     if (!session?.user?.id) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      return sendError({
+        message: "Unauthorized",
+        status: 401,
+        error: "You must be logged in to update templates",
+      });
     }
 
     const template = await prisma.template.findFirst({
@@ -59,7 +80,11 @@ export async function PATCH(
     });
 
     if (!template) {
-      return NextResponse.json({ error: "Template not found" }, { status: 404 });
+      return sendError({
+        message: "Template not found",
+        status: 404,
+        error: "Template does not exist or you don't have permission to update it",
+      });
     }
 
     const body = await request.json();
@@ -74,10 +99,18 @@ export async function PATCH(
       },
     });
 
-    return NextResponse.json({ template: updatedTemplate });
+    return sendSuccess({
+      message: "Template updated successfully",
+      status: 200,
+      data: { template: updatedTemplate },
+    });
   } catch (error) {
     console.error("Error updating template:", error);
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+    return sendError({
+      message: "Failed to update template",
+      status: 500,
+      error: error instanceof Error ? error.message : "Unknown error",
+    });
   }
 }
 
@@ -90,7 +123,11 @@ export async function DELETE(
     const { id, templateId } = await params;
 
     if (!session?.user?.id) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      return sendError({
+        message: "Unauthorized",
+        status: 401,
+        error: "You must be logged in to delete templates",
+      });
     }
 
     const template = await prisma.template.findFirst({
@@ -104,16 +141,28 @@ export async function DELETE(
     });
 
     if (!template) {
-      return NextResponse.json({ error: "Template not found" }, { status: 404 });
+      return sendError({
+        message: "Template not found",
+        status: 404,
+        error: "Template does not exist or you don't have permission to delete it",
+      });
     }
 
     await prisma.template.delete({
       where: { id: templateId },
     });
 
-    return NextResponse.json({ success: true });
+    return sendSuccess({
+      message: "Template deleted successfully",
+      status: 200,
+      data: { templateId },
+    });
   } catch (error) {
     console.error("Error deleting template:", error);
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+    return sendError({
+      message: "Failed to delete template",
+      status: 500,
+      error: error instanceof Error ? error.message : "Unknown error",
+    });
   }
 }

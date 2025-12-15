@@ -3,6 +3,7 @@
 import { use, useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useSession } from "next-auth/react";
+import { toast } from 'sonner';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -19,7 +20,7 @@ import {
   DialogTrigger,
 } from '@/components/ui/dialog';
 import { ArrowLeft, Save, Trash2, AlertTriangle } from 'lucide-react';
-import Navbar from '@/components/Navbar';
+import { Navbar } from '@/components/layout';
 
 interface Project {
   id: string;
@@ -59,12 +60,18 @@ export default function ProjectSettings({ params }: { params: Promise<{ id: stri
     try {
       const response = await fetch(`/api/project/${projectId}`);
       if (response.ok) {
-        const data = await response.json();
-        setProject(data.project);
-        setFormData({
-          name: data.project.ProjectName,
-          description: data.project.description || ''
-        });
+        const result = await response.json();
+        const projectData = result.data?.project;
+        if (projectData) {
+          setProject(projectData);
+          setFormData({
+            name: projectData.ProjectName,
+            description: projectData.description || ''
+          });
+        }
+      } else {
+        const error = await response.json();
+        console.error('Error:', error.message);
       }
     } catch (error) {
       console.error('Error fetching project:', error);
@@ -92,14 +99,14 @@ export default function ProjectSettings({ params }: { params: Promise<{ id: stri
       const result = await response.json();
 
       if (response.ok) {
-        alert(result.message || 'Project updated successfully!');
+        toast.success(result.message || 'Project updated successfully!');
         fetchProject();
       } else {
-        alert(result.message || 'Failed to update project');
+        toast.error(result.message || 'Failed to update project');
       }
     } catch (error) {
       console.error('Error updating project:', error);
-      alert('Failed to update project');
+      toast.error('Failed to update project');
     } finally {
       setSaving(false);
     }
@@ -107,7 +114,7 @@ export default function ProjectSettings({ params }: { params: Promise<{ id: stri
 
   const handleDelete = async () => {
     if (confirmText !== project?.ProjectName) {
-      alert('Project name does not match');
+      toast.error('Project name does not match');
       return;
     }
 
@@ -121,15 +128,15 @@ export default function ProjectSettings({ params }: { params: Promise<{ id: stri
       const result = await response.json();
 
       if (response.ok) {
-        alert(result.message || 'Project deleted successfully!');
+        toast.success(result.message || 'Project deleted successfully!');
         router.push('/dashboard');
       } else {
-        alert(result.message || 'Failed to delete project');
+        toast.error(result.message || 'Failed to delete project');
         setDeleting(false);
       }
     } catch (error) {
       console.error('Error deleting project:', error);
-      alert('Failed to delete project');
+      toast.error('Failed to delete project');
       setDeleting(false);
     }
   };
@@ -243,19 +250,20 @@ export default function ProjectSettings({ params }: { params: Promise<{ id: stri
                         <AlertTriangle className="h-5 w-5" />
                         Delete Project
                       </DialogTitle>
-                      <DialogDescription className="space-y-4 pt-4">
-                        <p>
-                          This will permanently delete <strong>{project.ProjectName}</strong> and all of its:
-                        </p>
-                        <ul className="list-disc list-inside space-y-1 text-sm">
-                          <li>Certificate templates</li>
-                          <li>Generated certificates</li>
-                          <li>Datasets and records</li>
-                        </ul>
-                        <p className="font-semibold text-destructive">
-                          This action cannot be undone!
-                        </p>
+                      <DialogDescription>
+                        This will permanently delete <strong>{project.ProjectName}</strong> and all of its certificate templates, generated certificates, datasets and records. This action cannot be undone!
                       </DialogDescription>
+                    </DialogHeader>
+                    
+                    <div className="space-y-4 pt-4">
+                      <ul className="list-disc list-inside space-y-1 text-sm text-muted-foreground">
+                        <li>Certificate templates</li>
+                        <li>Generated certificates</li>
+                        <li>Datasets and records</li>
+                      </ul>
+                      <div className="font-semibold text-destructive text-sm">
+                        ⚠️ This action cannot be undone!
+                      </div>
                     </DialogHeader>
                     
                     <div className="space-y-4 pt-4">

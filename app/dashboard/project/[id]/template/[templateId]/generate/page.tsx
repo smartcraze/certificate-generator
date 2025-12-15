@@ -2,12 +2,13 @@
 
 import { use, useEffect, useState } from 'react';
 import Link from 'next/link';
+import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { ArrowLeft, Download } from 'lucide-react';
-import Navbar from '@/components/Navbar';
+import { Navbar } from '@/components/layout';
 
 interface Template {
   id: string;
@@ -37,8 +38,11 @@ export default function GenerateCertificate({
     try {
       const response = await fetch(`/api/project/${projectId}/templates/${templateId}`);
       if (response.ok) {
-        const data = await response.json();
-        setTemplate(data.template);
+        const result = await response.json();
+        setTemplate(result.data?.template || null);
+      } else {
+        const error = await response.json();
+        console.error('Error:', error.message);
       }
     } catch (error) {
       console.error('Error fetching template:', error);
@@ -49,7 +53,7 @@ export default function GenerateCertificate({
 
   const handleGenerate = async () => {
     // This would integrate with the certificate generation logic
-    alert('Certificate generation will be implemented with fabric.js rendering');
+    toast.info('Certificate generation will be implemented with fabric.js rendering');
   };
 
   if (loading) {

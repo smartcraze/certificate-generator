@@ -3,10 +3,11 @@
 import { use, useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft } from 'lucide-react';
-import Navbar from '@/components/Navbar';
-import CertificateEditor from '@/components/CertificateEditor';
+import { Navbar } from '@/components/layout';
+import CertificateEditor from '@/components/certificate-editor';
 
 interface Template {
   id: string;
@@ -33,8 +34,11 @@ export default function EditTemplate({
     try {
       const response = await fetch(`/api/project/${projectId}/templates/${templateId}`);
       if (response.ok) {
-        const data = await response.json();
-        setTemplate(data.template);
+        const result = await response.json();
+        setTemplate(result.data?.template || null);
+      } else {
+        const error = await response.json();
+        console.error('Error:', error.message);
       }
     } catch (error) {
       console.error('Error fetching template:', error);
@@ -56,10 +60,11 @@ export default function EditTemplate({
         }),
       });
 
+      const result = await response.json();
       if (response.ok) {
-        alert('Template saved successfully!');
+        toast.success(result.message || 'Template saved successfully!');
       } else {
-        throw new Error('Failed to save template');
+        throw new Error(result.message || 'Failed to save template');
       }
     } catch (error) {
       console.error('Error saving template:', error);

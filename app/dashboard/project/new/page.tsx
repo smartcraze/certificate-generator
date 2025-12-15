@@ -3,13 +3,14 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
+import { toast } from 'sonner';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
-import Navbar from '@/components/Navbar';
+import { Navbar } from '@/components/layout';
 
 export default function NewProject() {
   const router = useRouter();
@@ -40,17 +41,18 @@ export default function NewProject() {
         // Handle the response structure: { status, message, data: { project } }
         const projectId = result.data?.project?.id;
         if (projectId) {
+          toast.success(result.message || 'Project created successfully!');
           router.push(`/dashboard/project/${projectId}`);
         } else {
-          alert('Project created but ID not found');
+          toast.error('Project created but ID not found');
         }
       } else {
         const error = await response.json();
-        alert(error.message || error.error || 'Failed to create project');
+        toast.error(error.message || 'Failed to create project');
       }
     } catch (error) {
       console.error('Error creating project:', error);
-      alert('Failed to create project');
+      toast.error('Failed to create project');
     } finally {
       setLoading(false);
     }

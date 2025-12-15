@@ -3,12 +3,13 @@
 import { use, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { ArrowLeft, Upload, Image as ImageIcon } from 'lucide-react';
-import Navbar from '@/components/Navbar';
+import { Navbar } from '@/components/layout';
 import { useDropzone } from 'react-dropzone';
 
 const PREBUILT_TEMPLATES = [
@@ -69,7 +70,7 @@ export default function NewTemplate({ params }: { params: Promise<{ id: string }
     e.preventDefault();
     
     if (!templateName || !uploadedFileUrl) {
-      alert('Please provide a template name and select a template');
+      toast.error('Please provide a template name and select a template');
       return;
     }
 
@@ -93,15 +94,21 @@ export default function NewTemplate({ params }: { params: Promise<{ id: string }
       });
 
       if (response.ok) {
-        const data = await response.json();
-        router.push(`/dashboard/project/${projectId}/template/${data.template.id}/edit`);
+        const result = await response.json();
+        const templateId = result.data?.template?.id;
+        if (templateId) {
+          toast.success(result.message || 'Template created successfully!');
+          router.push(`/dashboard/project/${projectId}/template/${templateId}/edit`);
+        } else {
+          toast.error('Template created but ID not found');
+        }
       } else {
         const error = await response.json();
-        alert(error.error || 'Failed to create template');
+        toast.error(error.message || 'Failed to create template');
       }
     } catch (error) {
       console.error('Error creating template:', error);
-      alert('Failed to create template');
+      toast.error('Failed to create template');
     } finally {
       setLoading(false);
     }

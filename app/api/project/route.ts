@@ -2,13 +2,18 @@ import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import prisma from "@/lib/db";
+import { sendError, sendSuccess } from "@/lib/apiResponse";
 
 export async function GET() {
   try {
     const session = await getServerSession(authOptions);
 
     if (!session?.user?.id) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      return sendError({
+        message: "Unauthorized",
+        status: 401,
+        error: "You must be logged in to view projects",
+      });
     }
 
     const projects = await prisma.project.findMany({
@@ -28,9 +33,17 @@ export async function GET() {
       },
     });
 
-    return NextResponse.json({ projects });
+    return sendSuccess({
+      message: "Projects fetched successfully",
+      status: 200,
+      data: { projects },
+    });
   } catch (error) {
     console.error("Error fetching projects:", error);
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+    return sendError({
+      message: "Failed to fetch projects",
+      status: 500,
+      error: error instanceof Error ? error.message : "Unknown error",
+    });
   }
 }

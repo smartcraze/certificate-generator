@@ -7,7 +7,7 @@ import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { ArrowLeft, Plus, FileText, Pencil, Trash2, FileSignature } from 'lucide-react';
-import Navbar from '@/components/Navbar';
+import { Navbar } from '@/components/layout';
 
 interface Template {
   id: string;
@@ -52,12 +52,18 @@ export default function ProjectPage({ params }: { params: Promise<{ id: string }
 
       if (projectRes.ok) {
         const projectData = await projectRes.json();
-        setProject(projectData.project);
+        setProject(projectData.data?.project || null);
+      } else {
+        const error = await projectRes.json();
+        console.error('Error:', error.message);
       }
 
       if (templatesRes.ok) {
         const templatesData = await templatesRes.json();
-        setTemplates(templatesData.templates || []);
+        setTemplates(templatesData.data?.templates || []);
+      } else {
+        const error = await templatesRes.json();
+        console.error('Error:', error.message);
       }
     } catch (error) {
       console.error('Error fetching project data:', error);

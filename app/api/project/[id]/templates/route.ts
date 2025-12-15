@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import prisma from "@/lib/db";
+import { sendError, sendSuccess } from "@/lib/apiResponse";
 
 export async function GET(
   request: Request,
@@ -12,7 +13,11 @@ export async function GET(
     const { id } = await params;
 
     if (!session?.user?.id) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      return sendError({
+        message: "Unauthorized",
+        status: 401,
+        error: "You must be logged in to view templates",
+      });
     }
 
     const project = await prisma.project.findFirst({
@@ -23,7 +28,11 @@ export async function GET(
     });
 
     if (!project) {
-      return NextResponse.json({ error: "Project not found" }, { status: 404 });
+      return sendError({
+        message: "Project not found",
+        status: 404,
+        error: "Project does not exist or you don't have permission to view it",
+      });
     }
 
     const templates = await prisma.template.findMany({
@@ -35,10 +44,18 @@ export async function GET(
       },
     });
 
-    return NextResponse.json({ templates });
+    return sendSuccess({
+      message: "Templates fetched successfully",
+      status: 200,
+      data: { templates },
+    });
   } catch (error) {
     console.error("Error fetching templates:", error);
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+    return sendError({
+      message: "Failed to fetch templates",
+      status: 500,
+      error: error instanceof Error ? error.message : "Unknown error",
+    });
   }
 }
 
@@ -51,7 +68,11 @@ export async function POST(
     const { id } = await params;
 
     if (!session?.user?.id) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      return sendError({
+        message: "Unauthorized",
+        status: 401,
+        error: "You must be logged in to create templates",
+      });
     }
 
     const project = await prisma.project.findFirst({
@@ -62,14 +83,22 @@ export async function POST(
     });
 
     if (!project) {
-      return NextResponse.json({ error: "Project not found" }, { status: 404 });
+      return sendError({
+        message: "Project not found",
+        status: 404,
+        error: "Project does not exist or you don't have permission to create templates in it",
+      });
     }
 
     const body = await request.json();
     const { name, fileUrl, configJSON } = body;
 
     if (!name || !fileUrl) {
-      return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
+      return sendError({
+        message: "Validation failed",
+        status: 400,
+        error: "Template name and file URL are required",
+      });
     }
 
     const template = await prisma.template.create({
@@ -81,9 +110,17 @@ export async function POST(
       },
     });
 
-    return NextResponse.json({ template });
+    return sendSuccess({
+      message: "Template created successfully",
+      status: 201,
+      data: { template },
+    });
   } catch (error) {
     console.error("Error creating template:", error);
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+    return sendError({
+      message: "Failed to create template",
+      status: 500,
+      error: error instanceof Error ? error.message : "Unknown error",
+    });
   }
 }
