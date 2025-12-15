@@ -19,6 +19,7 @@ export default function CertificateEditor({
   const [canvas, setCanvas] = useState<Canvas | null>(null);
   const [selectedObject, setSelectedObject] = useState<any>(null);
   const [saving, setSaving] = useState(false);
+  const [zoom, setZoom] = useState(1);
 
   useEffect(() => {
     if (!canvasRef.current) return;
@@ -62,9 +63,21 @@ export default function CertificateEditor({
     }
 
     // Event listeners
-    fabricCanvas.on('selection:created', (e) => setSelectedObject(e.selected?.[0]));
-    fabricCanvas.on('selection:updated', (e) => setSelectedObject(e.selected?.[0]));
+    fabricCanvas.on('selection:created', (e) => {
+      const obj = e.selected?.[0];
+      setSelectedObject(obj ? { ...obj } : null);
+    });
+    fabricCanvas.on('selection:updated', (e) => {
+      const obj = e.selected?.[0];
+      setSelectedObject(obj ? { ...obj } : null);
+    });
     fabricCanvas.on('selection:cleared', () => setSelectedObject(null));
+    fabricCanvas.on('object:modified', () => {
+      const activeObj = fabricCanvas.getActiveObject();
+      if (activeObj) {
+        setSelectedObject({ ...activeObj });
+      }
+    });
 
     setCanvas(fabricCanvas);
     
@@ -160,9 +173,35 @@ export default function CertificateEditor({
 
   const updateProperty = (property: string, value: any) => {
     if (!canvas || !selectedObject) return;
-    selectedObject.set(property, value);
+    const activeObj = canvas.getActiveObject();
+    if (!activeObj) return;
+    activeObj.set(property, value);
     canvas.renderAll();
-    setSelectedObject({ ...selectedObject });
+    // Force state update with new object reference
+    setSelectedObject({ ...activeObj });
+  };
+
+  const handleZoomIn = () => {
+    if (!canvas) return;
+    const newZoom = Math.min(zoom * 1.2, 3);
+    setZoom(newZoom);
+    canvas.setZoom(newZoom);
+    canvas.renderAll();
+  };
+
+  const handleZoomOut = () => {
+    if (!canvas) return;
+    const newZoom = Math.max(zoom / 1.2, 0.5);
+    setZoom(newZoom);
+    canvas.setZoom(newZoom);
+    canvas.renderAll();
+  };
+
+  const handleResetZoom = () => {
+    if (!canvas) return;
+    setZoom(1);
+    canvas.setZoom(1);
+    canvas.renderAll();
   };
 
   const handleSave = async () => {
@@ -200,35 +239,59 @@ export default function CertificateEditor({
   };
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-[280px,1fr,340px] gap-6">
-      <div className="space-y-4">
-        <QuickAddPanel 
-          onAddPresetField={addPresetField}
-          onAddText={addText}
-          onAddRectangle={addRectangle}
-        />
-        <LayerControlsPanel
-          selectedObject={selectedObject}
-          onDuplicate={duplicateSelected}
-          onBringToFront={bringToFront}
-          onSendToBack={sendToBack}
-          onDelete={deleteSelected}
-        />
-      </div>
-
-      <div className="space-y-4">
+    <div className="flex flex-col h-[calc(100vh-4rem)] bg-zinc-50">
+      {/* Top Toolbar */}
+      <div className="bg-white border-b border-zinc-200 px-4 py-3">
         <EditorToolbar
           onDownloadPreview={downloadPreview}
           onSave={handleSave}
           saving={saving}
+          zoom={zoom}
+          onZoomIn={handleZoomIn}
+          onZoomOut={handleZoomOut}
+          onResetZoom={handleResetZoom}
         />
-        <EditorCanvas canvasRef={canvasRef} />
       </div>
 
-      <PropertiesPanel
-        selectedObject={selectedObject}
-        onUpdateProperty={updateProperty}
-      />
+      {/* Main Editor Area */}
+      <div className="flex flex-1 overflow-hidden">
+        {/* Left Sidebar */}
+        <div className="w-[280px] bg-white border-r border-zinc-200 overflow-y-auto">
+          <div className="p-4 space-y-6">
+            <QuickAddPanel 
+              onAddPresetField={addPresetField}
+              onAddText={addText}
+              onAddRectangle={addRectangle}
+            />
+            <div className="border-t border-zinc-200 pt-6">
+              <LayerControlsPanel
+                selectedObject={selectedObject}
+                onDuplicate={duplicateSelected}
+                onBringToFront={bringToFront}
+                onSendToBack={sendToBack}
+                onDelete={deleteSelected}
+              />
+            </div>
+          </div>
+        </div>
+
+        {/* Canvas Area */}
+        <div className="flex-1 overflow-auto bg-zinc-100">
+          <div className="min-h-full flex items-center justify-center p-8">
+            <EditorCanvas canvasRef={canvasRef} />
+          </div>
+        </div>
+
+        {/* Right Sidebar */}
+        <div className="w-[340px] bg-white border-l border-zinc-200 overflow-y-auto">
+          <div className="p-4">
+            <PropertiesPanel
+              selectedObject={selectedObject}
+              onUpdateProperty={updateProperty}
+            />
+          </div>
+        </div>
+      </div>
     </div>
   );
 }

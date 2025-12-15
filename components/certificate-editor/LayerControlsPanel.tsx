@@ -17,51 +17,57 @@ export function LayerControlsPanel({
   onSendToBack, 
   onDelete 
 }: LayerControlsPanelProps) {
+  if (!selectedObject) {
+    return (
+      <div className="text-center py-6">
+        <p className="text-sm text-zinc-500">
+          Select an element to see layer controls
+        </p>
+      </div>
+    );
+  }
+
   return (
-    <Card className="shadow-lg">
-      <CardContent className="p-4 space-y-2">
-        <h3 className="font-semibold text-sm mb-3 text-primary">Layer Controls</h3>
+    <div>
+      <h3 className="text-sm font-semibold text-zinc-900 mb-3">Layer Controls</h3>
+      <div className="space-y-2">
         <Button
           onClick={onDuplicate}
           variant="outline"
+          className="w-full justify-start h-10 border-zinc-200 hover:bg-zinc-50 hover:border-zinc-300"
           size="sm"
-          className="w-full justify-start"
-          disabled={!selectedObject}
         >
-          <Copy className="h-4 w-4 mr-2" />
-          Duplicate
+          <Copy className="h-4 w-4 text-zinc-700" />
+          <span className="ml-2 text-sm">Duplicate</span>
         </Button>
         <Button
           onClick={onBringToFront}
           variant="outline"
+          className="w-full justify-start h-10 border-zinc-200 hover:bg-zinc-50 hover:border-zinc-300"
           size="sm"
-          className="w-full justify-start"
-          disabled={!selectedObject}
         >
-          <ArrowUp className="h-4 w-4 mr-2" />
-          Bring to Front
+          <ArrowUp className="h-4 w-4 text-zinc-700" />
+          <span className="ml-2 text-sm">Bring to Front</span>
         </Button>
         <Button
           onClick={onSendToBack}
           variant="outline"
+          className="w-full justify-start h-10 border-zinc-200 hover:bg-zinc-50 hover:border-zinc-300"
           size="sm"
-          className="w-full justify-start"
-          disabled={!selectedObject}
         >
-          <ArrowDown className="h-4 w-4 mr-2" />
-          Send to Back
+          <ArrowDown className="h-4 w-4 text-zinc-700" />
+          <span className="ml-2 text-sm">Send to Back</span>
         </Button>
         <Button
           onClick={onDelete}
           variant="outline"
+          className="w-full justify-start h-10 border-red-200 text-red-600 hover:bg-red-50 hover:border-red-300"
           size="sm"
-          className="w-full justify-start text-destructive hover:text-destructive hover:bg-destructive/5"
-          disabled={!selectedObject}
         >
-          <Trash2 className="h-4 w-4 mr-2" />
-          Delete
+          <Trash2 className="h-4 w-4" />
+          <span className="ml-2 text-sm">Delete</span>
         </Button>
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   );
 }

@@ -264,7 +264,7 @@ export default function ProjectSettings({ params }: { params: Promise<{ id: stri
                       <div className="font-semibold text-destructive text-sm">
                         ⚠️ This action cannot be undone!
                       </div>
-                    </DialogHeader>
+                    </div>
                     
                     <div className="space-y-4 pt-4">
                       <div className="space-y-2">

@@ -9,35 +9,40 @@ interface PropertiesPanelProps {
 }
 
 export function PropertiesPanel({ selectedObject, onUpdateProperty }: PropertiesPanelProps) {
-  return (
-    <Card className="shadow-lg sticky top-4">
-      <CardContent className="p-4 space-y-4 max-h-[calc(100vh-120px)] overflow-y-auto">
-        <h3 className="font-semibold text-lg text-primary sticky top-0 bg-card py-2 -mt-2">
-          {selectedObject ? 'Edit Properties' : 'Properties'}
-        </h3>
+  if (!selectedObject) {
+    return (
+      <div className="text-center py-12">
+        <div className="w-16 h-16 rounded-full bg-zinc-100 flex items-center justify-center mx-auto mb-4">
+          <svg className="w-8 h-8 text-zinc-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 15l-2 5L9 9l11 4-5 2zm0 0l5 5M7.188 2.239l.777 2.897M5.136 7.965l-2.898-.777M13.95 4.05l-2.122 2.122m-5.657 5.656l-2.12 2.122" />
+          </svg>
+        </div>
+        <p className="text-sm font-medium text-zinc-900 mb-1">No element selected</p>
+        <p className="text-xs text-zinc-500">
+          Select an element to edit its properties
+        </p>
+      </div>
+    );
+  }
 
-        {selectedObject && selectedObject.type === 'i-text' ? (
-          <TextPropertiesPanel 
-            selectedObject={selectedObject} 
-            onUpdateProperty={onUpdateProperty} 
-          />
-        ) : selectedObject ? (
-          <ShapePropertiesPanel 
-            selectedObject={selectedObject} 
-            onUpdateProperty={onUpdateProperty} 
-          />
-        ) : (
-          <div className="text-center py-12">
-            <Type className="h-16 w-16 mx-auto text-muted-foreground/30 mb-4" />
-            <p className="text-sm text-muted-foreground font-medium mb-1">
-              No element selected
-            </p>
-            <p className="text-xs text-muted-foreground">
-              Click an element on the canvas or add new fields from the left panel
-            </p>
-          </div>
-        )}
-      </CardContent>
-    </Card>
+  const isText = selectedObject.type === 'i-text' || selectedObject.type === 'text';
+  const isShape = selectedObject.type === 'rect' || selectedObject.type === 'circle';
+
+  return (
+    <div>
+      <h3 className="text-sm font-semibold text-zinc-900 mb-4">Properties</h3>
+      {isText && (
+        <TextPropertiesPanel 
+          selectedObject={selectedObject} 
+          onUpdateProperty={onUpdateProperty}
+        />
+      )}
+      {isShape && (
+        <ShapePropertiesPanel 
+          selectedObject={selectedObject} 
+          onUpdateProperty={onUpdateProperty}
+        />
+      )}
+    </div>
   );
 }
